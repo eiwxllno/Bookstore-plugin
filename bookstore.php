@@ -28,7 +28,7 @@ function bookstore_register_book_post_type() {
         'public' => true,
         'has_archive' => true,
         'show_in_rest' => true,
-        'supports' => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt' ),
+        'supports' => array( 'title', 'editor', 'author', 'thumbnail', 'excerpt', 'custom-fields' ),
     );
 
     register_post_type( 'book', $args );
@@ -53,4 +53,27 @@ function bookstore_register_genre_taxonomy() {
     );
 
     register_taxonomy( 'genre', 'book', $args );
+}
+
+add_filter( 'postmeta_form_keys', 'bookstore_add_isbn_to_quick_edit', 10, 2 );
+function bookstore_add_isbn_to_quick_edit( $keys, $post ) {
+    if ( $post->post_type === 'book' ) {
+        $keys[] = 'isbn';
+    }
+    return $keys;
+}
+
+add_action( 'wp_enqueue_scripts', 'bookstore_enqueue_scripts' );
+function bookstore_enqueue_scripts() {
+    if ( ! is_singular( 'book' ) ) {
+        return;
+    }
+    wp_enqueue_style(
+        'bookstore-style',
+        plugins_url() . '/bookstore/bookstore.css'
+    );
+    wp_enqueue_script(
+        'bookstore-script',
+        plugins_url() . '/bookstore/bookstore.js'
+    );
 }
